@@ -69,6 +69,33 @@ def save_raw_data(data: dict, filename: str):
         
     logging.info(f"Datos raw guardados exitosamente en {filepath}")
 
+def search_team_id_by_name(team_name: str) -> int:
+    """
+    Busca un equipo por su nombre y devuelve su ID oficial de la API
+    """
+    endpoint = f"{API_BASE_URL}/teams"
+    params = {"search": team_name}
+    
+    try:
+        response = requests.get(endpoint, headers=get_headers(), params=params, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        
+        results = data.get("response", [])
+        if not results:
+            logging.error(f"No se encontró ningún equipo con el nombre '{team_name}'")
+            return None
+            
+        team_id = results[0]["team"]["id"]
+        exact_name = results[0]["team"]["name"]
+        logging.info(f"Equipo encontrado: {exact_name} (ID: {team_id})")
+        
+        return team_id
+
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Error al buscar el equipo: {e}")
+        return None
+
 # Bloque de prueba
 if __name__ == "__main__":
     # Probaremos con el Real Madrid (ID: 541) para la temporada 2023
