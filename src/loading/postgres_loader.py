@@ -98,22 +98,3 @@ def load_data_to_postgres(transformed_data: dict):
         conn.rollback() 
     finally:
         conn.close()
-
-# Bloque de prueba
-if __name__ == "__main__":
-    import json
-    import os
-    from src.transformation.player_transformer import transform_players_data
-    
-    filepath = os.path.join("data", "raw", "players_real_madrid_2023.json")
-    
-    try:
-        with open(filepath, 'r', encoding='utf-8') as f:
-            raw_json = json.load(f)
-            
-        transformed_data = transform_players_data(raw_json)
-        
-        load_data_to_postgres(transformed_data)
-            
-    except FileNotFoundError:
-        print("Error: No se encontró el archivo RAW")

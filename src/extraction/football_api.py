@@ -17,35 +17,67 @@ def get_headers():
 
 def fetch_players_by_team(team_id: int, season: int) -> dict:
     """
-    Extrae los datos de los jugadores de un equipo en una temporada específica
+    Extrae los datos de todos los jugadores de un equipo en una temporada,
+    recorriendo todas las páginas disponibles de la API
     """
     endpoint = f"{API_BASE_URL}/players"
-    params = {
-        "team": team_id,
-        "season": season
-    }
-    
+    all_players = []
+    current_page = 1
+    total_pages = 1
+
     logging.info(f"Extrayendo jugadores del equipo {team_id} (Temporada {season})...")
-    
+
     try:
-        response = requests.get(
-            endpoint, 
-            headers=get_headers(), 
-            params=params, 
-            timeout=10
-        )
-        
-        # Levanta una excepción si el código HTTP es 4xx o 5xx
-        response.raise_for_status()
-        
-        data = response.json()
-        
-        # La API devuelve errores dentro del JSON a veces
-        if data.get("errors"):
-            logging.error(f"Error de la API: {data['errors']}")
+        while current_page <= total_pages:
+            params = {
+                "team": team_id,
+                "season": season,
+                "page": current_page
+            }
+
+            response = requests.get(
+                endpoint,
+                headers=get_headers(),
+                params=params,
+                timeout=10
+            )
+
+            response.raise_for_status()
+            data = response.json()
+
+            if data.get("errors"):
+                logging.error(f"Error de la API: {data['errors']}")
+                return None
+
+            page_response = data.get("response", [])
+            if not page_response:
+                break
+
+            all_players.extend(page_response)
+
+            paging = data.get("paging") or {}
+            total_pages = int(paging.get("total", 1) or 1)
+            current_page += 1
+
+        if not all_players:
             return None
-            
-        return data
+
+        first_page_data = {
+            "get": "players",
+            "parameters": {
+                "team": str(team_id),
+                "season": str(season)
+            },
+            "errors": [],
+            "results": len(all_players),
+            "paging": {
+                "current": total_pages,
+                "total": total_pages
+            },
+            "response": all_players
+        }
+
+        return first_page_data
 
     except requests.exceptions.RequestException as e:
         logging.error(f"Error HTTP al conectar con la API: {e}")

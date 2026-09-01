@@ -95,27 +95,3 @@ def transform_players_data(raw_data: dict) -> dict:
         "players": list(players.values()),
         "statistics": statistics
     }
-
-# Bloque de prueba
-if __name__ == "__main__":
-    import os
-    
-    filepath = os.path.join("data", "raw", "players_real_madrid_2023.json")
-    
-    try:
-        with open(filepath, 'r', encoding='utf-8') as f:
-            raw_json = json.load(f)
-            
-        transformed_data = transform_players_data(raw_json)
-        
-        # Imprimimos un jugador y una estadística de ejemplo para verificar
-        if transformed_data["players"]:
-            print("\nEjemplo de jugador limpio:")
-            print(transformed_data["players"][0])
-            
-        if transformed_data["statistics"]:
-            print("\nEjemplo de estadística limpia:")
-            print(transformed_data["statistics"][0])
-            
-    except FileNotFoundError:
-        print("Error: No se encontró el archivo RAW")

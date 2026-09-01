@@ -50,10 +50,3 @@ def run_pipeline(team_id: int, season: int):
     logging.info("==================================================")
     logging.info(f"Pipeline completado exitosamente en {elapsed_time} segundos")
     logging.info("==================================================")
-
-if __name__ == "__main__":
-    # Datos iniciales (Real Madrid - Temporada 2023)
-    TARGET_TEAM_ID = 541
-    TARGET_SEASON = 2023
-    
-    run_pipeline(TARGET_TEAM_ID, TARGET_SEASON)
