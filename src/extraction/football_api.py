@@ -15,20 +15,21 @@ def get_headers():
         "x-rapidapi-host": API_HOST
     }
 
-def fetch_players_by_team(team_id: int, season: int) -> dict:
+def fetch_players_by_team(team_id: int, season: int, max_pages: int = 3) -> dict:
     """
-    Extrae los datos de todos los jugadores de un equipo en una temporada,
-    recorriendo todas las páginas disponibles de la API
+    Extrae los jugadores de un equipo y temporada recorriendo hasta el máximo
+    permitido por el plan gratuito.
     """
     endpoint = f"{API_BASE_URL}/players"
     all_players = []
     current_page = 1
     total_pages = 1
+    limit_reached = False
 
     logging.info(f"Extrayendo jugadores del equipo {team_id} (Temporada {season})...")
 
     try:
-        while current_page <= total_pages:
+        while current_page <= max_pages:
             params = {
                 "team": team_id,
                 "season": season,
@@ -56,13 +57,26 @@ def fetch_players_by_team(team_id: int, season: int) -> dict:
             all_players.extend(page_response)
 
             paging = data.get("paging") or {}
-            total_pages = int(paging.get("total", 1) or 1)
+            total_pages = int(paging.get("total", current_page) or current_page)
+
+            if total_pages > max_pages:
+                limit_reached = True
+                logging.warning(
+                    "La API reporta más de %s páginas para este equipo, pero el plan gratuito solo permite %s. "
+                    "Se devolverá una extracción parcial.",
+                    max_pages,
+                    max_pages,
+                )
+
+            if current_page >= min(total_pages, max_pages):
+                break
+
             current_page += 1
 
         if not all_players:
             return None
 
-        first_page_data = {
+        partial_data = {
             "get": "players",
             "parameters": {
                 "team": str(team_id),
@@ -71,13 +85,14 @@ def fetch_players_by_team(team_id: int, season: int) -> dict:
             "errors": [],
             "results": len(all_players),
             "paging": {
-                "current": total_pages,
-                "total": total_pages
+                "current": min(current_page, max_pages),
+                "total": min(total_pages, max_pages)
             },
+            "limit_reached": limit_reached,
             "response": all_players
         }
 
-        return first_page_data
+        return partial_data
 
     except requests.exceptions.RequestException as e:
         logging.error(f"Error HTTP al conectar con la API: {e}")

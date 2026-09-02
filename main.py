@@ -18,8 +18,8 @@ def main():
         opcion = input("Elige una opción (1-3): ")
 
         if opcion == "1":
-            team_name = input("\nIntroduce el nombre del equipo (Ej: FC Barcelona, Real Madrid): ")
-            season_input = input("Introduce la temporada (Ej: 2025 o 2025-2026): ")
+            team_name = input("\nIntroduce el nombre del equipo (Ej: Barcelona, Real Madrid): ")
+            season_input = input("Introduce el año (Solo del 2022 al 2024): ")
             
             season = season_input.split("-")[0].strip()
             
@@ -32,7 +32,7 @@ def main():
                 print("No se pudo iniciar la descarga. Revisa el nombre del equipo")
 
         elif opcion == "2":
-            player_name = input("\nIntroduce el nombre del jugador a buscar (Ej: Yamal, Bellingham): ")
+            player_name = input("\nIntroduce el nombre del jugador a buscar (Ej: Lamine Yamal, Bellingham): ")
             search_player_in_db(player_name)
 
         elif opcion == "3":
