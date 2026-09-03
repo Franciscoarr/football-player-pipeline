@@ -14,6 +14,7 @@ El flujo principal es:
 4. Transforma los datos para normalizarlos en estructuras útiles.
 5. Carga los equipos, jugadores y estadísticas en PostgreSQL.
 6. Permite consultar jugadores desde la base de datos.
+7. Incluye un dashboard interactivo para analizar los datos.
 
 ## Tecnologías utilizadas
 
@@ -22,6 +23,7 @@ El flujo principal es:
 - PostgreSQL: almacenamiento de la información
 - Docker + Docker Compose: para levantar la base de datos
 - psycopg2-binary: conexión con PostgreSQL desde Python
+- Streamlit y Altair: dashboard y gráficos interactivos
 - python-dotenv: manejo de variables de entorno
 - Pytest: pruebas unitarias
 
@@ -41,6 +43,8 @@ football-player-pipeline/
 │   │   └── football_api.py
 │   ├── loading/
 │   │   └── postgres_loader.py
+│   ├── dashboard/
+│   │   └── app.py
 │   └── transformation/
 │       └── player_transformer.py
 ├── sql/
@@ -122,6 +126,11 @@ Además, normaliza medidas como altura y peso, por ejemplo:
 - "75 kg" -> 75
 - "N/A" o vacío -> None
 
+El país del equipo se obtiene de `team.country` cuando está disponible. En la
+respuesta del endpoint de jugadores de Api-Football normalmente aparece en
+`league.country`, por lo que se utiliza como respaldo para evitar que el campo
+`country` quede vacío.
+
 Esto facilita la carga posterior en PostgreSQL.
 
 ---
@@ -180,7 +189,38 @@ Ejecuta este flujo:
 
 ---
 
-### 9. sql/schema.sql
+### 9. src/dashboard/app.py
+
+Contiene un dashboard desarrollado con Streamlit y conectado a PostgreSQL.
+
+Permite filtrar los datos por:
+
+- equipo
+- temporada
+- competición
+
+Muestra indicadores generales y gráficos interactivos con el Top 5 de:
+
+- goleadores
+- asistentes
+- tarjetas amarillas
+- tarjetas rojas
+- minutos disputados
+- partidos jugados
+
+Los gráficos seleccionan los cinco valores más altos y los ordenan de mayor a
+menor según la métrica representada. También incluye una tabla detallada con
+los registros filtrados.
+
+Para iniciar el dashboard:
+
+```bash
+streamlit run src/dashboard/app.py
+```
+
+---
+
+### 10. sql/schema.sql
 
 Define la base de datos del proyecto.
 
@@ -194,7 +234,7 @@ Incluye índices para optimizar búsquedas por temporada y jugador.
 
 ---
 
-### 10. tests/test_transformer.py
+### 11. tests/test_transformer.py
 
 Contiene pruebas unitarias para validar:
 
