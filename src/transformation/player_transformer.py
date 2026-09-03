@@ -57,13 +57,16 @@ def transform_players_data(raw_data: dict) -> dict:
             cards = stat.get("cards", {})
             
             team_id = team_info.get("id")
+            team_country = team_info.get("country") or league_info.get("country")
             
             if team_id and team_id not in teams:
                 teams[team_id] = {
                     "team_id": team_id,
                     "name": team_info.get("name"),
-                    "country": None # La API en este endpoint a veces no da el país del equipo
+                    "country": team_country,
                 }
+            elif team_id and not teams[team_id]["country"] and team_country:
+                teams[team_id]["country"] = team_country
             
             if team_id and league_info.get("name"):
                 statistics.append({

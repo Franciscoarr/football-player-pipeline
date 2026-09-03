@@ -32,7 +32,11 @@ def test_transform_players_data_structure():
                 "statistics": [
                     {
                         "team": {"id": 100, "name": "Test Team"},
-                        "league": {"name": "Test League", "season": 2023},
+                        "league": {
+                            "name": "Test League",
+                            "country": "Spain",
+                            "season": 2023,
+                        },
                         "goals": {"total": 5},
                         "games": {"appearences": 10}
                     }
@@ -51,3 +55,4 @@ def test_transform_players_data_structure():
     # Comprobamos que la limpieza se aplicó dentro de la transformación
     assert result["players"][0]["height"] == 180
     assert result["statistics"][0]["goals"] == 5
+    assert result["teams"][0]["country"] == "Spain"
